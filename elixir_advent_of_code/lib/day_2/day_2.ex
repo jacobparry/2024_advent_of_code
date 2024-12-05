@@ -1,7 +1,7 @@
 defmodule Day2 do
   def run do
     input =
-      File.read!("day_2_input.txt")
+      File.read!("lib/day_2/day_2_input.txt")
       |> String.split("\n", trim: true)
       |> Enum.map(&String.split(&1, " "))
 
