@@ -57,7 +57,7 @@ defmodule Day2 do
     report_with_index = Enum.with_index(report)
 
     results =
-      Enum.map(report_with_index, fn {level, index} ->
+      Enum.map(report_with_index, fn {_level, index} ->
         report_without_level = List.delete_at(report, index)
 
         is_report_safe?(report_without_level)
