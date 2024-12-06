@@ -1,8 +1,6 @@
 defmodule Day4.Part1 do
   def run do
-    input =
-      File.read!("lib/day_4/day_4_input.txt")
-
+    input = File.read!("lib/day_4/day_4_input.txt")
     parse_input(input)
   end
 
