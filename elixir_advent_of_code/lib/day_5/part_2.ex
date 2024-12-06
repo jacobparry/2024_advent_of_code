@@ -1,7 +1,7 @@
-defmodule Day5.Part1 do
+defmodule Day5.Part2 do
   def run do
     input = File.read!("lib/day_5/day_5_input.txt")
-    part_1(input)
+    part_2(input)
   end
 
   def parse_input(input) do
@@ -18,7 +18,47 @@ defmodule Day5.Part1 do
       group_updates(rules, updates)
 
     sum_middle_values(valid)
-    |> IO.inspect(label: "sum of middle values")
+    |> IO.inspect(label: "sum of valid middle values")
+  end
+
+  def part_2(input) do
+    %{rules: rules, updates: updates} = parse_input(input)
+
+    %{valid: valid, invalid: invalid} = group_updates(rules, updates)
+
+    corrected_invalid_updates = fix_invalid_updates(rules, invalid)
+
+    sum_middle_values(corrected_invalid_updates)
+    |> IO.inspect(label: "sum of corrected invalid middle values")
+  end
+
+  def fix_invalid_updates(rules, invalid_updates) do
+    grouped_rules = group_rules(rules)
+
+    Enum.reduce(invalid_updates, [], fn update_list, acc ->
+      # TODO: Implement
+      # order the invalid update to match the rule
+
+      corrected_update =
+        Enum.reduce(update_list, [], fn page, acc ->
+          page_specific_rules =
+            Map.get(grouped_rules, page, [])
+
+          insert_in_correct_order(acc, page, page_specific_rules)
+        end)
+
+      acc ++ [corrected_update]
+    end)
+  end
+
+  def insert_in_correct_order(acc, page, page_specific_rules) do
+    position =
+      Enum.find_index(acc, fn existing_page ->
+        Enum.member?(page_specific_rules, existing_page)
+      end) || length(acc)
+
+    List.insert_at(acc, position, page)
+    |> List.flatten()
   end
 
   def group_updates(rules, updates) do
@@ -44,9 +84,25 @@ defmodule Day5.Part1 do
   def filter_rules(rules, update_list) do
     # I only care about rules where both parts are present
     # Rules that don't have both parts don't apply
-
     Enum.filter(rules, fn [x, y] ->
       Enum.member?(update_list, x) and Enum.member?(update_list, y)
+    end)
+  end
+
+  def group_rules(rules) do
+    Enum.reduce(rules, %{}, fn [x, y] = _rule, acc ->
+      filtered_rules =
+        Enum.filter(rules, fn [a, b] ->
+          x == a
+        end)
+
+      sorted_rules =
+        Enum.reduce(filtered_rules, [], fn [a, b] = _rule, acc ->
+          [b | acc]
+        end)
+        |> Enum.sort(:asc)
+
+      Map.put(acc, x, sorted_rules)
     end)
   end
 
