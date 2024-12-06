@@ -16,49 +16,62 @@ defmodule Day5.Part1 do
 
     %{valid: valid, invalid: _invalid} =
       group_updates(rules, updates)
-      |> IO.inspect(label: "valid and invalid", charlists: :as_lists)
+
+    # |> IO.inspect(label: "valid and invalid", charlists: :as_lists)
 
     sum_middle_values(valid)
+    |> IO.inspect(label: "sum of middle values")
   end
 
   def group_updates(rules, updates) do
-    Enum.reduce(updates, %{valid: [], invalid: []}, fn update_list, acc ->
-      filtered_rules =
-        Enum.filter(rules, fn [x, _y] -> Enum.member?(update_list, x) end)
+    %{valid: valid, invalid: invalid} =
+      Enum.reduce(updates, %{valid: [], invalid: []}, fn update_list, acc ->
+        filtered_rules = filter_rules(rules, update_list)
 
-      if Enum.all?(filtered_rules, fn [x, y] ->
-           is_valid_rule?(update_list, [x, y])
-         end) do
-        %{acc | valid: acc.valid ++ [update_list]}
-      else
-        %{acc | invalid: acc.invalid ++ [update_list]}
-      end
+        if Enum.all?(filtered_rules, fn rule ->
+             is_valid_rule?(update_list, rule)
+           end) do
+          %{acc | valid: acc.valid ++ [update_list]}
+        else
+          %{acc | invalid: acc.invalid ++ [update_list]}
+        end
+      end)
+
+    %{valid: Enum.count(valid), invalid: Enum.count(invalid)}
+    |> IO.inspect(label: "valid and invalid counts")
+
+    %{valid: valid, invalid: invalid}
+  end
+
+  def filter_rules(rules, update_list) do
+    # I only care about rules where both parts are present
+    # Rules that don't have both parts don't apply
+
+    Enum.filter(rules, fn [x, y] ->
+      Enum.member?(update_list, x) and Enum.member?(update_list, y)
     end)
   end
 
   def is_valid_rule?(update_list, [page, rule]) do
+    IO.inspect(update_list, label: "update_list", charlists: :as_lists)
+    IO.inspect([page, rule], label: "page and rule", charlists: :as_lists)
     index_page = Enum.find_index(update_list, fn z -> z == page end)
     index_rule = Enum.find_index(update_list, fn z -> z == rule end)
 
-    case {index_page, index_rule} do
-      # page or rule not found in update list, so ignore the rule
-      {nil, nil} -> false
-      # page not found in update list, so ignore the rule
-      {nil, _} -> false
-      # rule not found in update list, so ignore the rule
-      {_, nil} -> true
-      # page index must be less than rule index
-      {x, y} -> x < y
-    end
+    IO.inspect({index_page, index_rule}, label: "index_page and index_rule")
+
+    index_page < index_rule
   end
 
   def sum_middle_values(update_lists) do
-    Enum.map(update_lists, &find_middle_value/1)
-    |> Enum.sum()
+    Enum.reduce(update_lists, 0, fn update_list, acc ->
+      acc + find_middle_value(update_list)
+    end)
   end
 
   def find_middle_value(update_list) do
-    middle_index = div(length(update_list), 2)
+    # -1 because the list is 0-indexed
+    middle_index = div(length(update_list) - 1, 2)
     Enum.at(update_list, middle_index)
   end
 end

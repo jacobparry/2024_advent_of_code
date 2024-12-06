@@ -82,5 +82,8 @@ defmodule Day5Test do
     assert Day5.Part1.sum_middle_values(valid) == 143
 
     assert Day5.Part1.run() == 4603
+
+    update_list = [75, 47, 61, 53, 29]
+    Day5.Part1.find_middle_value(update_list) == 61
   end
 end
