@@ -58,7 +58,6 @@ defmodule Day5.Part2 do
       end) || length(acc)
 
     List.insert_at(acc, position, page)
-    |> List.flatten()
   end
 
   def group_updates(rules, updates) do
