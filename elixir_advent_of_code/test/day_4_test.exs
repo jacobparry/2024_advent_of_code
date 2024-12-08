@@ -15,7 +15,8 @@ defmodule Day4Test do
     MXMXAXMASX
     """
 
-    block = Day4.Part1.create_block(test_input)
+    block =
+      Day4.Part1.create_block(test_input)
 
     assert block[0][0] == "M"
     assert block[0][1] == "M"

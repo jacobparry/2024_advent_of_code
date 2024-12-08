@@ -77,8 +77,6 @@ defmodule Day5Test do
     %{valid: valid, invalid: _invalid} =
       Day5.Part1.group_updates(rules, updates)
 
-    # |> IO.inspect(label: "sorted update lists", charlists: :as_lists)
-
     assert Day5.Part1.sum_middle_values(valid) == 143
 
     assert Day5.Part1.run() == 4689

@@ -18,7 +18,6 @@ defmodule Day5.Part1 do
       group_updates(rules, updates)
 
     sum_middle_values(valid)
-    |> IO.inspect(label: "sum of middle values")
   end
 
   def group_updates(rules, updates) do
@@ -36,7 +35,6 @@ defmodule Day5.Part1 do
       end)
 
     %{valid: Enum.count(valid), invalid: Enum.count(invalid)}
-    |> IO.inspect(label: "valid and invalid counts")
 
     %{valid: valid, invalid: invalid}
   end

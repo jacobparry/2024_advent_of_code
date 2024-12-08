@@ -18,18 +18,16 @@ defmodule Day5.Part2 do
       group_updates(rules, updates)
 
     sum_middle_values(valid)
-    |> IO.inspect(label: "sum of valid middle values")
   end
 
   def part_2(input) do
     %{rules: rules, updates: updates} = parse_input(input)
 
-    %{valid: valid, invalid: invalid} = group_updates(rules, updates)
+    %{valid: _valid, invalid: invalid} = group_updates(rules, updates)
 
     corrected_invalid_updates = fix_invalid_updates(rules, invalid)
 
     sum_middle_values(corrected_invalid_updates)
-    |> IO.inspect(label: "sum of corrected invalid middle values")
   end
 
   def fix_invalid_updates(rules, invalid_updates) do
@@ -75,7 +73,6 @@ defmodule Day5.Part2 do
       end)
 
     %{valid: Enum.count(valid), invalid: Enum.count(invalid)}
-    |> IO.inspect(label: "valid and invalid counts")
 
     %{valid: valid, invalid: invalid}
   end
@@ -89,14 +86,14 @@ defmodule Day5.Part2 do
   end
 
   def group_rules(rules) do
-    Enum.reduce(rules, %{}, fn [x, y] = _rule, acc ->
+    Enum.reduce(rules, %{}, fn [x, _y] = _rule, acc ->
       filtered_rules =
-        Enum.filter(rules, fn [a, b] ->
+        Enum.filter(rules, fn [a, _b] ->
           x == a
         end)
 
       sorted_rules =
-        Enum.reduce(filtered_rules, [], fn [a, b] = _rule, acc ->
+        Enum.reduce(filtered_rules, [], fn [_a, b] = _rule, acc ->
           [b | acc]
         end)
         |> Enum.sort(:asc)
