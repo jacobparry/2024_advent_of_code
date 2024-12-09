@@ -106,38 +106,6 @@ defmodule Day6.Part2 do
     end
   end
 
-  def move_guard(grid, guard_coordinates, obstacles_hit, loops, loop_count) do
-    {current_x, current_y} = guard_coordinates
-    current_guard_direction = grid[current_x][current_y]
-
-    {new_guard_direction, next_x, next_y} =
-      get_next_guard_coordinates(grid, guard_coordinates)
-
-    case grid[next_x][next_y] do
-      nil ->
-        {new_grid, new_guard_coordinates, new_direction} =
-          handle_turn(grid, guard_coordinates, new_guard_direction)
-
-        {:halt, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count}
-
-      :obstacle ->
-        {new_grid, new_guard_coordinates, new_direction} =
-          handle_turn(grid, guard_coordinates, new_guard_direction)
-
-        {:cont, new_grid, new_guard_coordinates,
-         obstacles_hit ++ [{current_guard_direction, :obstacle, next_x, next_y}], loops,
-         loop_count}
-
-      _ ->
-        new_guard_coordinates = {next_x, next_y}
-
-        new_grid =
-          update_grid(grid, guard_coordinates, new_guard_coordinates, current_guard_direction)
-
-        {:cont, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count}
-    end
-  end
-
   def simulate_move_guard(grid, guard_coordinates, obstacles_hit, loops, loop_count) do
     {current_guard_direction, next_x, next_y} =
       get_next_guard_coordinates(grid, guard_coordinates)
@@ -177,6 +145,38 @@ defmodule Day6.Part2 do
 
       # {:cont, new_grid, new_guard_coordinates,
       #  obstacles_hit ++ [{current_guard_direction, :obstacle, next_x, next_y}]}
+
+      _ ->
+        new_guard_coordinates = {next_x, next_y}
+
+        new_grid =
+          update_grid(grid, guard_coordinates, new_guard_coordinates, current_guard_direction)
+
+        {:cont, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count}
+    end
+  end
+
+  def move_guard(grid, guard_coordinates, obstacles_hit, loops, loop_count) do
+    {current_x, current_y} = guard_coordinates
+    current_guard_direction = grid[current_x][current_y]
+
+    {new_guard_direction, next_x, next_y} =
+      get_next_guard_coordinates(grid, guard_coordinates)
+
+    case grid[next_x][next_y] do
+      nil ->
+        {new_grid, new_guard_coordinates, new_direction} =
+          handle_turn(grid, guard_coordinates, new_guard_direction)
+
+        {:halt, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count}
+
+      :obstacle ->
+        {new_grid, new_guard_coordinates, new_direction} =
+          handle_turn(grid, guard_coordinates, new_guard_direction)
+
+        {:cont, new_grid, new_guard_coordinates,
+         obstacles_hit ++ [{current_guard_direction, :obstacle, next_x, next_y}], loops,
+         loop_count}
 
       _ ->
         new_guard_coordinates = {next_x, next_y}
