@@ -18,17 +18,16 @@ defmodule Day6.Part2 do
   def part_2(grid) do
     guard_coordinates = find_guard_coordinates(grid)
 
-    {:halt, final_grid, _guard_coordinates, obstacles_hit, loops, loop_count} =
-      walk_grid(grid, guard_coordinates, [], [], 0)
+    {:halt, final_grid, _guard_coordinates, places_been, obstacles_hit, loops, loop_count} =
+      walk_grid(grid, guard_coordinates, MapSet.new(), [], [], 0)
 
     count_guard_positions(final_grid)
 
-    IO.inspect(loops, label: "loops")
+    # Enum.uniq(loops)
+    # |> Enum.count()
+    # |> IO.inspect(label: "loop_count")
 
-    Enum.uniq(loops)
-    |> Enum.count()
-    |> IO.inspect(label: "loop_count")
-
+    IO.inspect(loop_count, label: "loop_count")
     loop_count
   end
 
@@ -56,24 +55,32 @@ defmodule Day6.Part2 do
     end)
   end
 
-  def walk_grid(grid, guard_coordinates, obstacles_hit, loops, loop_count) do
-    {_, _new_grid, _new_guard_coordinates, _new_obstacles_hit, loops, loop_count} =
-      simulate_walk_grid(grid, guard_coordinates, obstacles_hit, loops, loop_count)
+  def walk_grid(grid, guard_coordinates, places_been, obstacles_hit, loops, loop_count) do
+    {_, _new_grid, _new_guard_coordinates, _new_places_been, _new_obstacles_hit, loops,
+     loop_count} =
+      simulate_walk_grid(grid, guard_coordinates, places_been, obstacles_hit, loops, loop_count)
 
     IO.inspect(loop_count, label: "loop_count")
 
-    case move_guard(grid, guard_coordinates, obstacles_hit, loops, loop_count) do
-      {:cont, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count} ->
+    case move_guard(grid, guard_coordinates, places_been, obstacles_hit, loops, loop_count) do
+      {:cont, new_grid, new_guard_coordinates, new_places_been, obstacles_hit, loops, loop_count} ->
         # guard moved
-        walk_grid(new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count)
+        walk_grid(
+          new_grid,
+          new_guard_coordinates,
+          new_places_been,
+          obstacles_hit,
+          loops,
+          loop_count
+        )
 
-      {:halt, grid, guard_coordinates, obstacles_hit, loops, loop_count} ->
+      {:halt, grid, guard_coordinates, new_places_been, obstacles_hit, loops, loop_count} ->
         # guard walked off the grid
-        {:halt, grid, guard_coordinates, obstacles_hit, loops, loop_count}
+        {:halt, grid, guard_coordinates, new_places_been, obstacles_hit, loops, loop_count}
     end
   end
 
-  def simulate_walk_grid(grid, guard_coordinates, obstacles_hit, loops, loop_count) do
+  def simulate_walk_grid(grid, guard_coordinates, places_been, obstacles_hit, loops, loop_count) do
     {_new_guard_direction, next_x, next_y} = get_next_guard_coordinates(grid, guard_coordinates)
 
     hypothetical_grid =
@@ -92,73 +99,33 @@ defmodule Day6.Part2 do
     case simulate_move_guard(
            hypothetical_grid,
            guard_coordinates,
+           places_been,
            obstacles_hit,
            loops,
            loop_count
          ) do
-      {:cont, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count} ->
+      {:cont, new_grid, new_guard_coordinates, new_places_been, obstacles_hit, loops, loop_count} ->
         # guard moved
-        simulate_walk_grid(new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count)
+        simulate_walk_grid(
+          new_grid,
+          new_guard_coordinates,
+          new_places_been,
+          obstacles_hit,
+          loops,
+          loop_count
+        )
 
-      {:halt, grid, guard_coordinates, obstacles_hit, loops, loop_count} ->
+      {:halt, grid, guard_coordinates, new_places_been, obstacles_hit, loops, loop_count} ->
         # guard walked off the grid
-        {:halt, grid, guard_coordinates, obstacles_hit, loops, loop_count}
+        {:halt, grid, guard_coordinates, new_places_been, obstacles_hit, loops, loop_count}
     end
   end
 
-  def simulate_move_guard(grid, guard_coordinates, obstacles_hit, loops, loop_count) do
-    {current_guard_direction, next_x, next_y} =
-      get_next_guard_coordinates(grid, guard_coordinates)
-
-    {new_grid, new_guard_coordinates, new_direction} =
-      handle_turn(grid, guard_coordinates, current_guard_direction)
-
-    case grid[next_x][next_y] do
-      nil ->
-        {new_grid, new_guard_coordinates, new_direction} =
-          handle_turn(grid, guard_coordinates, current_guard_direction)
-
-        {:halt, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count}
-
-      :obstacle ->
-        IO.inspect({current_guard_direction, :obstacle, next_x, next_y}, label: "obstacle_hit")
-        IO.inspect(obstacles_hit)
-
-        Enum.any?(obstacles_hit, fn {direction, obstacle, x, y} ->
-          direction == current_guard_direction and obstacle == :obstacle and x == next_x and
-            y == next_y
-        end)
-        |> IO.inspect(label: "already_hit")
-        |> case do
-          true ->
-            loop = Enum.take(obstacles_hit, -4)
-            IO.inspect(loop, label: "loop")
-
-            {:halt, new_grid, new_guard_coordinates, obstacles_hit, loops ++ [loop],
-             loop_count + 1}
-
-          false ->
-            {:cont, new_grid, new_guard_coordinates,
-             obstacles_hit ++ [{current_guard_direction, :obstacle, next_x, next_y}], loops,
-             loop_count}
-        end
-
-      # {:cont, new_grid, new_guard_coordinates,
-      #  obstacles_hit ++ [{current_guard_direction, :obstacle, next_x, next_y}]}
-
-      _ ->
-        new_guard_coordinates = {next_x, next_y}
-
-        new_grid =
-          update_grid(grid, guard_coordinates, new_guard_coordinates, current_guard_direction)
-
-        {:cont, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count}
-    end
-  end
-
-  def move_guard(grid, guard_coordinates, obstacles_hit, loops, loop_count) do
+  def move_guard(grid, guard_coordinates, places_been, obstacles_hit, loops, loop_count) do
     {current_x, current_y} = guard_coordinates
     current_guard_direction = grid[current_x][current_y]
+
+    new_places_been = MapSet.put(places_been, {current_guard_direction, current_x, current_y})
 
     {new_guard_direction, next_x, next_y} =
       get_next_guard_coordinates(grid, guard_coordinates)
@@ -168,14 +135,14 @@ defmodule Day6.Part2 do
         {new_grid, new_guard_coordinates, new_direction} =
           handle_turn(grid, guard_coordinates, new_guard_direction)
 
-        {:halt, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count}
+        {:halt, new_grid, new_guard_coordinates, new_places_been, obstacles_hit, loops,
+         loop_count}
 
       :obstacle ->
         {new_grid, new_guard_coordinates, new_direction} =
           handle_turn(grid, guard_coordinates, new_guard_direction)
 
-        {:cont, new_grid, new_guard_coordinates,
-         obstacles_hit ++ [{current_guard_direction, :obstacle, next_x, next_y}], loops,
+        {:cont, new_grid, new_guard_coordinates, new_places_been, obstacles_hit, loops,
          loop_count}
 
       _ ->
@@ -184,7 +151,88 @@ defmodule Day6.Part2 do
         new_grid =
           update_grid(grid, guard_coordinates, new_guard_coordinates, current_guard_direction)
 
-        {:cont, new_grid, new_guard_coordinates, obstacles_hit, loops, loop_count}
+        {:cont, new_grid, new_guard_coordinates, new_places_been, obstacles_hit, loops,
+         loop_count}
+    end
+  end
+
+  def simulate_move_guard(grid, guard_coordinates, places_been, obstacles_hit, loops, loop_count) do
+    {current_x, current_y} = guard_coordinates
+    current_guard_direction = grid[current_x][current_y]
+
+    IO.inspect({current_guard_direction, current_x, current_y},
+      label: "current_guard_coordinates"
+    )
+
+    MapSet.member?(places_been, {current_guard_direction, current_x, current_y})
+    |> IO.inspect(label: "has_been_here")
+    |> case do
+      true ->
+        {:halt, grid, guard_coordinates, places_been, obstacles_hit, loops, loop_count + 1}
+
+      false ->
+        new_places_been =
+          new_places_been =
+          MapSet.put(places_been, {current_guard_direction, current_x, current_y})
+          |> IO.inspect(label: "new_places_been")
+
+        {current_guard_direction, next_x, next_y} =
+          get_next_guard_coordinates(grid, guard_coordinates)
+
+        case grid[next_x][next_y] do
+          nil ->
+            {new_grid, new_guard_coordinates, new_direction} =
+              handle_turn(grid, guard_coordinates, current_guard_direction)
+
+            {:halt, new_grid, new_guard_coordinates, new_places_been, obstacles_hit, loops,
+             loop_count}
+
+          :obstacle ->
+            {new_grid, new_guard_coordinates, new_direction} =
+              handle_turn(grid, guard_coordinates, current_guard_direction)
+
+            hit_obstacle = {current_guard_direction, :obstacle, next_x, next_y}
+            obstacles_hit = obstacles_hit ++ [hit_obstacle]
+
+            # IO.inspect({current_guard_direction, :obstacle, next_x, next_y}, label: "obstacle_hit")
+            # IO.inspect(obstacles_hit)
+
+            loop = Enum.take(obstacles_hit, -5)
+
+            first = hd(loop)
+            last = List.last(loop)
+
+            if first == last and length(loop) == 5 do
+              IO.inspect(loop, label: "loop")
+              IO.inspect(first, label: "first")
+              IO.inspect(last, label: "last")
+
+              loop_set = MapSet.new(loop)
+
+              IO.inspect(loop_set, label: "loop_set")
+
+              # loops = MapSet.put(loops, loop_set)
+
+              loops = loops ++ [loop]
+
+              # IO.inspect(loops, label: "loops")
+
+              {:halt, new_grid, new_guard_coordinates, new_places_been, obstacles_hit, loops,
+               loop_count}
+            else
+              {:cont, new_grid, new_guard_coordinates, new_places_been, obstacles_hit, loops,
+               loop_count}
+            end
+
+          _ ->
+            new_guard_coordinates = {next_x, next_y}
+
+            new_grid =
+              update_grid(grid, guard_coordinates, new_guard_coordinates, current_guard_direction)
+
+            {:cont, new_grid, new_guard_coordinates, new_places_been, obstacles_hit, loops,
+             loop_count}
+        end
     end
   end
 
