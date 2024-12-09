@@ -197,6 +197,11 @@ defmodule Day6Test do
            ]
   end
 
+  test "part 2" do
+    grid = Day6.Part2.run_sample(sample_input())
+    assert Day6.Part2.part_2(grid) == 10
+  end
+
   defp sample_input do
     """
     ....#.....
