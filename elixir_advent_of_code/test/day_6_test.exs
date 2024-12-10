@@ -183,18 +183,18 @@ defmodule Day6Test do
   end
 
   test "obstruction coordinates" do
-    grid = Day6.Part2.run_sample(sample_input())
+    _grid = Day6.Part2.run_sample(sample_input())
 
-    assert Day6.Part2.find_obstacle_coordinates(grid) == [
-             {:obstacle, 0, 4},
-             {:obstacle, 1, 9},
-             {:obstacle, 3, 2},
-             {:obstacle, 4, 7},
-             {:obstacle, 6, 1},
-             {:obstacle, 7, 8},
-             {:obstacle, 8, 0},
-             {:obstacle, 9, 6}
-           ]
+    # assert Day6.Part2.find_obstacle_coordinates(grid) == [
+    #          {:obstacle, 0, 4},
+    #          {:obstacle, 1, 9},
+    #          {:obstacle, 3, 2},
+    #          {:obstacle, 4, 7},
+    #          {:obstacle, 6, 1},
+    #          {:obstacle, 7, 8},
+    #          {:obstacle, 8, 0},
+    #          {:obstacle, 9, 6}
+    #        ]
   end
 
   test "part 2" do
@@ -204,6 +204,63 @@ defmodule Day6Test do
 
     grid = Day6.Part2.run_file()
     assert Day6.Part2.part_2(grid) == 1808
+  end
+
+  test "part 2 try 3" do
+    grid = Day6.Part2Try3.run_sample(sample_input())
+
+    empty_cell = hd(Day6.Part2Try3.find_all_empty_cells(grid))
+    assert empty_cell == {:empty, 0, 0}
+
+    assert Day6.Part2Try3.find_guard_state(grid) == {:up, 6, 4}
+
+    assert Day6.Part2Try3.find_obstacle_coordinates(grid) == [
+             {:obstacle, 0, 4},
+             {:obstacle, 1, 9},
+             {:obstacle, 3, 2},
+             {:obstacle, 4, 7},
+             {:obstacle, 6, 1},
+             {:obstacle, 7, 8},
+             {:obstacle, 8, 0},
+             {:obstacle, 9, 6}
+           ]
+
+    assert Day6.Part2Try3.find_cells_between_guard_and_first_obstacle(grid) ==
+             [
+               {:empty, 6, 4},
+               {:empty, 5, 4},
+               {:empty, 4, 4},
+               {:empty, 3, 4},
+               {:empty, 2, 4},
+               {:empty, 1, 4}
+             ]
+
+    # assert Day6.Part2Try3.get_valid_empty_cells_for_obstacle(grid) ==
+    #          [
+    #            {:empty, 0, 0},
+    #            {:empty, 0, 1},
+    #            {:empty, 0, 2},
+    #            {:empty, 0, 3},
+    #            {:empty, 0, 5},
+    #            {:empty, 0, 6},
+    #            {:empty, 0, 7},
+    #            {:empty, 0, 8},
+    #            {:empty, 0, 9}
+    #          ]
+
+    valid_empty_cells = Day6.Part2Try3.get_valid_empty_cells_for_obstacle(grid)
+    alternate_grids = Day6.Part2Try3.make_alternate_grids(grid)
+    assert length(alternate_grids) == length(valid_empty_cells)
+
+    assert Day6.Part2Try3.find_loop_count(grid) == 6
+
+    grid = Day6.Part2Try3.run_file()
+    valid_empty_cells = Day6.Part2Try3.get_valid_empty_cells_for_obstacle(grid)
+    alternate_grids = Day6.Part2Try3.make_alternate_grids(grid)
+    assert length(alternate_grids) == 16042
+    assert length(valid_empty_cells) == 16042
+
+    # assert Day6.Part2Try3.find_loop_count(grid) == 1808
   end
 
   defp sample_input do
