@@ -1,7 +1,6 @@
 defmodule Day5.Day5Parser do
   import NimbleParsec
 
-  # Define the `mul(a,b)` parser
   rule =
     integer(2)
     |> ignore(string("|"))
