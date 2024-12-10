@@ -214,17 +214,6 @@ defmodule Day6Test do
 
     assert Day6.Part2Try3.find_guard_state(grid) == {:up, 6, 4}
 
-    assert Day6.Part2Try3.find_obstacle_coordinates(grid) == [
-             {:obstacle, 0, 4},
-             {:obstacle, 1, 9},
-             {:obstacle, 3, 2},
-             {:obstacle, 4, 7},
-             {:obstacle, 6, 1},
-             {:obstacle, 7, 8},
-             {:obstacle, 8, 0},
-             {:obstacle, 9, 6}
-           ]
-
     assert Day6.Part2Try3.find_cells_between_guard_and_first_obstacle(grid) ==
              [
                {:empty, 6, 4},
@@ -260,7 +249,7 @@ defmodule Day6Test do
     assert length(alternate_grids) == 16042
     assert length(valid_empty_cells) == 16042
 
-    # assert Day6.Part2Try3.find_loop_count(grid) == 1808
+    assert Day6.Part2Try3.find_loop_count(grid) == 1670
   end
 
   defp sample_input do

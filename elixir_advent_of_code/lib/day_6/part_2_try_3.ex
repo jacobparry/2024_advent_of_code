@@ -94,15 +94,6 @@ defmodule Day6.Part2Try3 do
     end)
   end
 
-  def find_obstacle_coordinates(grid) do
-    Enum.reduce(grid, [], fn {x_index, row_map}, acc ->
-      case Enum.find(row_map, fn {_y_index, cell} -> cell == :obstacle end) do
-        nil -> acc
-        {y_index, cell} -> acc ++ [{cell, x_index, y_index}]
-      end
-    end)
-  end
-
   def walk_grid(grid, guard_state, places_been) do
     if MapSet.member?(places_been, guard_state) do
       {:loop_detected, 1}
