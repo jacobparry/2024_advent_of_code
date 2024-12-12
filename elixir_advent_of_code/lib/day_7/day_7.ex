@@ -16,8 +16,12 @@ defmodule Day7 do
   end
 
   def part_1_file do
+    _start_time = DateTime.utc_now()
     equations = run_file()
-    part_1(equations)
+    results = part_1(equations)
+    _end_time = DateTime.utc_now()
+    # IO.inspect(DateTime.diff(end_time, start_time, :millisecond))
+    results
   end
 
   def part_1(equations) do
@@ -29,8 +33,12 @@ defmodule Day7 do
   end
 
   def part_2_file do
+    _start_time = DateTime.utc_now()
     equations = run_file()
-    part_2(equations)
+    results = part_2(equations)
+    _end_time = DateTime.utc_now()
+    # IO.inspect(DateTime.diff(end_time, start_time, :millisecond))
+    results
   end
 
   def part_2(equations) do
